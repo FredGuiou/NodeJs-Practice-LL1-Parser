@@ -1,0 +1,17 @@
+{
+  "name": "tp-node.js---ll(1)-parser",
+  "version": "1.0.0",
+  "description": "Créez un analyseur LL(1) qui lira le contenu d'un fichier .txt et générer un fichier Json dans le terminal.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test test/"
+  },
+  "keywords": [],
+  "author": "FredGuiou",
+  "license": "ISC",
+  "dependencies": {
+    "@nodesecure/eslint-config": "^1.7.0"
+  }
+}
