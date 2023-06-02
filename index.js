@@ -4,18 +4,17 @@ import path from "node:path";
 
 
 // Import des constantes
-const kFile = "example.txt";
+const kdefaultFile = "example.txt";
+const kfilePath = process.argv[2] ?? path.join(process.cwd(), kdefaultFile);
 
 function getDataFromfile() {
-  const cwd = process.cwd();
+  if (!fs.existsSync(kfilePath)) {
+    console.log("File doesn't exist");
 
-  const filePath = path.join(cwd, kFile);
-
-  if (!fs.existsSync(filePath)) {
-    throw new Error();
+    return null;
   }
 
-  const txtFile = fs.readFileSync(filePath, { encoding: "utf-8" });
+  const txtFile = fs.readFileSync(kfilePath, { encoding: "utf-8" });
   console.log(txtFile);
 
   return txtFile;
