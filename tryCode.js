@@ -1,31 +1,45 @@
 // Import Node.js dependencies
 import fs from "node:fs";
+import { EOL } from "node:os";
 import path from "node:path";
 
 
 // Import des constantes
-const kdefaultFile = "example.txt";
-const kfilePath = process.argv[2] ?? path.join(process.cwd(), kdefaultFile);
+const kDefaultFile = "example.txt";
+const kFilePath = process.argv[2] ?? path.join(process.cwd(), kDefaultFile);
 
+// Lecture du fichier d'entrée
 export function getDataFromFile() {
-  if (!fs.existsSync(kfilePath)) {
+  if (!fs.existsSync(kFilePath)) {
     console.log("File doesn't exist");
 
     return null;
   }
 
-  const txtFile = fs.readFileSync(kfilePath, { encoding: "utf-8" });
+  const inputTxtFile = fs.readFileSync(kFilePath, { encoding: "utf-8" });
 
-  return txtFile;
+  return inputTxtFile;
 }
 
-export async function createJsonObject() {
-  const content = getDataFromFile();
-  const jsonObject = {};
 
-  // console.log(jsonObject);
-  console.log("Work in progress on tryCode.js line 22");
+export function parseInput(txtFile) {
+  const lines = txtFile.trim().split(EOL);
+  // console.log("EOL:", lines);
+
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    const condition = trimmedLine.startsWith("@") ? trimmedLine.slice(1) : trimmedLine;
+    const splitCondition = trimmedLine.startsWith("@") ? condition.split("{") : condition;
+    const key = Array.isArray(splitCondition) ? splitCondition[0].toString() : splitCondition;
+    const stringifyKey = trimmedLine.startsWith("@") ? JSON.stringify(key.trimEnd()) : key;
+    console.log(stringifyKey);
+  }
 }
 
-getDataFromFile();
-createJsonObject();
+
+function main() {
+  const txtFile = getDataFromFile();
+  parseInput(txtFile);
+}
+
+main();

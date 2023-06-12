@@ -1,0 +1,9 @@
+{
+  "key@foo": {
+    "prop": "value",
+    "prop2": "bar"
+  },
+  "hello": {
+    "foo@": "mdr"
+  }
+}
