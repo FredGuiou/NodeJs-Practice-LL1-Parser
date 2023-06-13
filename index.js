@@ -20,4 +20,4 @@ function getDataFromfile() {
   return txtFile;
 }
 
-const txtFile = getDataFromfile();
+const data = getDataFromfile();

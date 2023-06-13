@@ -1,6 +1,5 @@
 // Import Node.js dependencies
 import fs from "node:fs";
-import { EOL } from "node:os";
 import path from "node:path";
 
 
@@ -8,7 +7,7 @@ import path from "node:path";
 const kDefaultFile = "example.txt";
 const kFilePath = process.argv[2] ?? path.join(process.cwd(), kDefaultFile);
 
-// Lecture du fichier d'entrée
+// dataGetter | Lecture du fichier d'entrée
 export function getDataFromFile() {
   if (!fs.existsSync(kFilePath)) {
     console.log("File doesn't exist");
@@ -16,30 +15,51 @@ export function getDataFromFile() {
     return null;
   }
 
-  const inputTxtFile = fs.readFileSync(kFilePath, { encoding: "utf-8" });
+  const dataSource = fs.readFileSync(kFilePath, { encoding: "utf-8" });
 
-  return inputTxtFile;
+  return dataSource;
 }
 
+// Tokenizer : analyse lexicale des inputData
+export function* tokenizer(dataSource) {
+  // Définition d'une string temporaire
+  let tmpString = "";
 
-export function parseInput(txtFile) {
-  const lines = txtFile.trim().split(EOL);
-  // console.log("EOL:", lines);
-
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    const condition = trimmedLine.startsWith("@") ? trimmedLine.slice(1) : trimmedLine;
-    const splitCondition = trimmedLine.startsWith("@") ? condition.split("{") : condition;
-    const key = Array.isArray(splitCondition) ? splitCondition[0].toString() : splitCondition;
-    const stringifyKey = trimmedLine.startsWith("@") ? JSON.stringify(key.trimEnd()) : key;
-    console.log(stringifyKey);
+  // Je boucle sur l'index et j'incrémente +1 tant que i < à la longueru de dataSource
+  for (let i = 0; i < dataSource.length; i++) {
+    // le caractère courant
+    const character = dataSource[i];
+    // Si le premier caractère de la string est un "@" alors on passe (équivaut à un delete du caractère)
+    if (i === 0) {
+      if (character === "@") {
+        continue;
+      }
+    }
+    else if (character === "@") {
+      tmpString += character;
+    }
+    // si le caractère est une lettre minuscule || majuscule || un chiffre
+    // alors je l'incrémente à tmpString
+    if (/[a-zA-Z0-9]/.test(character)) {
+      tmpString += character;
+    }
+    // // si le caractère est un espace alors les caractères qui le précèdent constituent une clé.
+    // if (/\s/.test(character)) {
+    //   const key = tmpString.slice(0, i);
+    //   yield key;
+    // }
   }
+  yield tmpString;
 }
 
 
-function main() {
-  const txtFile = getDataFromFile();
-  parseInput(txtFile);
+// Principale fonction | Launcher
+export function main() {
+  // Point d'entrée principal
+  const data = getDataFromFile();
+  for (const token of tokenizer(data)) {
+    console.log(token);
+  }
 }
 
 main();
