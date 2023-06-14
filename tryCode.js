@@ -4,7 +4,7 @@ import path from "node:path";
 
 
 // Import des constantes
-const kDefaultFile = "example.txt";
+const kDefaultFile = "input.txt";
 const kFilePath = process.argv[2] ?? path.join(process.cwd(), kDefaultFile);
 
 // dataGetter | Lecture du fichier d'entrée
@@ -30,12 +30,10 @@ export function* tokenizer(dataSource) {
     // le caractère courant
     const character = dataSource[i];
     // Si le premier caractère de la string est un "@" alors on passe (équivaut à un delete du caractère)
-    if (i === 0) {
-      if (character === "@") {
-        continue;
-      }
+    if (i === 0 && character === "@") {
+      continue;
     }
-    else if (character === "@") {
+    else if (character === "@" || character === "{" || character === ":" || character === "}") {
       tmpString += character;
     }
     // si le caractère est une lettre minuscule || majuscule || un chiffre
@@ -43,12 +41,12 @@ export function* tokenizer(dataSource) {
     if (/[a-zA-Z0-9]/.test(character)) {
       tmpString += character;
     }
-    // // si le caractère est un espace alors les caractères qui le précèdent constituent une clé.
-    // if (/\s/.test(character)) {
-    //   const key = tmpString.slice(0, i);
-    //   yield key;
-    // }
+    // si le caractère est un espace alors, on l'affiche.
+    if (/\s/.test(character)) {
+      tmpString += character;
+    }
   }
+
   yield tmpString;
 }
 
