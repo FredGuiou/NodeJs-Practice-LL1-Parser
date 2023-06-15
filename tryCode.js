@@ -6,6 +6,7 @@ import path from "node:path";
 // Import des constantes
 const kDefaultFile = "input.txt";
 const kFilePath = process.argv[2] ?? path.join(process.cwd(), kDefaultFile);
+const kSpecialCharacters = new Set(["@", "{", ":", "}", "\""]);
 
 // dataGetter | Lecture du fichier d'entrée
 export function getDataFromFile() {
@@ -28,8 +29,13 @@ export function* tokenizer(dataSource) {
 
   // Je boucle sur l'index et j'incrémente +1 tant que i < à la longueru de dataSource
   for (let i = 0; i < dataSource.length; i++) {
+    // les constantes de la boucle & des règles du tokenizer
     // le caractère courant
     const character = dataSource[i];
+    const kIsCurrentCharacterWordOrDigit = /[a-zA-Z0-9]/.test(character);
+    const kIsPreviousCharacterWordOrDigit = /[a-zA-Z0-9]/.test(previousCharacter);
+    const kIsCurrentCharacterSpace = /\s/.test(character);
+
     // Si l'index est égal à zéro OU qu'il est égal à 0 ET que le caractère courant est un "@"
     // J'insère "{\"" afin d'ouvrir ma structure JSson et l"ouverture de ma clé
     // Sinon si j'arrive à la fin de ma chaine de caractères alors je ferme ma structure Json avec "}"
@@ -42,48 +48,47 @@ export function* tokenizer(dataSource) {
     }
 
     // Si le caratère courant est @ ou : ou { ou encore } alors je les considère et je les insère dans ma variable
-    if (character === "@" || character === "{" || character === ":" || character === "}" || character === "\"") {
+    if (kSpecialCharacters.has(character)) {
       tmpString += character;
     }
 
     // Si le caractère précédent est un espace et que le caractère courant est une lettre ou un chifre
     // alors on insère un "\"" dans la variable.
-    if (previousCharacter === " " && /[a-zA-Z0-9]/.test(character)) {
+    if (previousCharacter === " " && kIsCurrentCharacterWordOrDigit) {
       tmpString += "\"";
     }
 
     // Si le caractère précédent est une lettre ou un chiffre ET que le caractère courrant est : OU un espace
     // j'insère "\"" dans ma variable.
-    if (/[a-zA-Z0-9]/.test(previousCharacter) && (character === ":" || /\s/.test(character))) {
+    if (kIsPreviousCharacterWordOrDigit && (character === ":" || kIsCurrentCharacterSpace)) {
       tmpString += "\"";
     }
 
-    // Si le caractère précédent est " ET que le caractère courrant est /\s/
-    // j'insère "," dans ma variable pour signifier le changement de propriété
-    if (previousCharacter === "\"" && /\s/.test(character)) {
+    if (previousCharacter === "\"" && kIsCurrentCharacterSpace) {
+      tmpString += ":";
+    }
+
+    if (previousCharacter === "@" && character === ":") {
+      tmpString += "\"";
+    }
+
+    if (character === "}" && i < dataSource.length) {
       tmpString += ",";
     }
 
-    // TODO: gérer le cas d'un @ en cas de lés multiple. Ne fonctionne pas à revoir.
-    if (previousCharacter === " " && character === "@") {
-      character.replace("@", "\"");
-      tmpString += character;
-    }
-
-
     // si le caractère est une lettre minuscule || majuscule || un chiffre
     // alors je l'incrémente à la variable.
-    if (/[a-zA-Z0-9]/.test(character)) {
+    if (kIsCurrentCharacterWordOrDigit) {
       tmpString += character;
     }
     // si le caractère est un espace alors, on l'affiche.
-    if (/\s/.test(character)) {
+    if (kIsCurrentCharacterSpace) {
       tmpString += character;
     }
 
     previousCharacter = character;
-    tmpString = tmpString.replace(":\"", "\":");
     tmpString = tmpString.replace("\" ", "\": ");
+    tmpString = tmpString.replace(":\"", "\":");
   }
 
   yield tmpString;
@@ -106,4 +111,4 @@ export function main() {
 main();
 
 
-// TODO: Reste les virgules et les guillemets de fin pour foo + voir si possible refacto
+// TODO: Reste les virgules & le @ de @hello + voir si possible refacto
