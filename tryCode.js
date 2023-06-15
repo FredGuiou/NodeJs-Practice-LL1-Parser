@@ -35,6 +35,7 @@ export function* tokenizer(dataSource) {
     const kIsCurrentCharacterWordOrDigit = /[a-zA-Z0-9]/.test(character);
     const kIsPreviousCharacterWordOrDigit = /[a-zA-Z0-9]/.test(previousCharacter);
     const kIsCurrentCharacterSpace = /\s/.test(character);
+    const kForbidenCharacters = new Set(["@", "\""]);
 
     // Si l'index est égal à zéro OU qu'il est égal à 0 ET que le caractère courant est un "@"
     // J'insère "{\"" afin d'ouvrir ma structure JSson et l"ouverture de ma clé
@@ -44,7 +45,10 @@ export function* tokenizer(dataSource) {
       continue;
     }
     else if (i === dataSource.length - 1) {
-      tmpString += "}";
+      tmpString += "}}";
+      yield tmpString;
+
+      return ;
     }
 
     // Si le caratère courant est @ ou : ou { ou encore } alors je les considère et je les insère dans ma variable
@@ -57,6 +61,7 @@ export function* tokenizer(dataSource) {
     if (previousCharacter === " " && kIsCurrentCharacterWordOrDigit) {
       tmpString += "\"";
     }
+
 
     // Si le caractère précédent est une lettre ou un chiffre ET que le caractère courrant est : OU un espace
     // j'insère "\"" dans ma variable.
@@ -91,9 +96,9 @@ export function* tokenizer(dataSource) {
     tmpString = tmpString.replace(":\"", "\":");
   }
 
-  yield tmpString;
+  // yield tmpString;
 
-  // const jsonObject = JSON.parse(tmpString);
+  const jsonObject = JSON.parse(tmpString);
 
   // yield jsonObject;
 }

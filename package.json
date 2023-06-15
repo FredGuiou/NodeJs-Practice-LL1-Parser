@@ -12,6 +12,7 @@
   "author": "FredGuiou",
   "license": "ISC",
   "dependencies": {
-    "@nodesecure/eslint-config": "^1.7.0"
+    "@nodesecure/eslint-config": "^1.7.0",
+    "@slimio/pretty-json": "^1.3.0"
   }
 }
