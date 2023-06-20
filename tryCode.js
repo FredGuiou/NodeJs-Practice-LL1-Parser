@@ -17,8 +17,9 @@ export function getDataFromFile() {
   }
 
   const dataSource = fs.readFileSync(kFilePath, { encoding: "utf-8" });
+  const trimData = dataSource.split(" ").join("");
 
-  return dataSource;
+  return trimData;
 }
 
 // Tokenizer : analyse lexicale des inputData
@@ -32,10 +33,10 @@ export function* tokenizer(dataSource) {
     // les constantes de la boucle & des règles du tokenizer
     // le caractère courant
     const character = dataSource[i];
+    const nextCharacter = dataSource[i + 1];
     const kIsCurrentCharacterWordOrDigit = /[a-zA-Z0-9]/.test(character);
     const kIsPreviousCharacterWordOrDigit = /[a-zA-Z0-9]/.test(previousCharacter);
     const kIsCurrentCharacterSpace = /\s/.test(character);
-    const kForbidenCharacters = new Set(["@"]);
 
     // Si l'index est égal à zéro OU qu'il est égal à 0 ET que le caractère courant est un "@"
     // J'insère "{\"" afin d'ouvrir ma structure JSson et l"ouverture de ma clé
@@ -45,11 +46,16 @@ export function* tokenizer(dataSource) {
       continue;
     }
     else if (i === dataSource.length - 1) {
-      tmpString += "}}";
+      tmpString += "}";
       yield tmpString;
 
       return ;
     }
+
+    if (character === "{") {
+      tmpString += "\":";
+    }
+
 
     // Si le caratère courant est @ ou : ou { ou encore } alors je les considère et je les insère dans ma variable
     if (kSpecialCharacters.has(character)) {
@@ -93,7 +99,7 @@ export function* tokenizer(dataSource) {
 
     previousCharacter = character;
     // tmpString = tmpString.replace("\" ", "\": ");
-    tmpString = tmpString.replace(":\"", "\":");
+    // tmpString = tmpString.replace(":\"", "\":");
   }
 
   // const jsonObject = JSON.parse(tmpString);
@@ -106,8 +112,7 @@ export function* tokenizer(dataSource) {
 export function main() {
   // Point d'entrée principal
   const data = getDataFromFile();
-  const trimData = data.split(" ").join("").replace(/\r?\n|\r/g, "");
-  for (const token of tokenizer(trimData)) {
+  for (const token of tokenizer(data)) {
     console.log(token);
   }
 }
@@ -115,4 +120,4 @@ export function main() {
 main();
 
 
-// TODO: Reste les virgules & le @ de @hello + voir si possible refacto
+// TODO: Bloqué sur les virgules & le @ de @hello + voir si possible refacto
